@@ -45,6 +45,7 @@ class Lobby {
         this.gamePhase = 0;
         this.removingPlayers = [];
         this.hints = [];
+        this.correctGuess = true;
         hostingPlayer.socket.talk(p.encodePacket([protocol.client.lobbyJoined, this.code, 1], ["int8", "string", "int8"]));
         this.updateState();
     }
@@ -66,8 +67,22 @@ class Lobby {
 
     kickPlayer(player) {
         this.reset();
+        player.socket.talk(p.encodePacket([protocol.client.kicked], ["int8"]))
         this.players.splice(this.players.indexOf(player), 1);
+        if (this.players.length === 0) {
+            Lobby.lobbies.splice(Lobby.lobbies.indexOf(this));
+            return;
+        }
+        if (player.host) this.players[Math.floor(this.players.length * Math.random())].host = true;
         this.startGame();
+    }
+
+    markCorrect() {
+        if (this.correctGuess) return;
+        if (this.gamePhase !== 5) return;
+        this.points++;
+        this.correctGuess = true;
+        this.updateState();
     }
 
     reset() {
@@ -77,6 +92,7 @@ class Lobby {
         this.finalGuess = "";
         this.players = this.players.concat(this.waitingPlayers);
         this.waitingPlayers = [];
+        this.correctGuess = true;
         for (let player of this.players) {
             player.spectator = false;
             player.waiting = false;
@@ -162,7 +178,7 @@ class Lobby {
         this.gamePhase = 5;
         if (guess === this.currentCard) {
             this.points++;
-        }
+        } else this.correctGuess = false;
         this.cardsRemaining++;
         this.finalGuess = guess;
         this.cardHistory.push(this.currentCard);
@@ -322,6 +338,13 @@ const sockets = {
                 case protocol.server.sendClues: {
                     if (!this.playerInstance) break;
                     this.playerInstance.lobby.startGuessing();
+                    break;
+                }
+                // begin the guessing phase
+                case protocol.server.markCorrect: {
+                    if (!this.playerInstance) break;
+                    if (!this.playerInstance.host) break;
+                    this.playerInstance.lobby.markCorrect();
                     break;
                 }
                 // kick player

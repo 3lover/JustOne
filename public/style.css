@@ -347,29 +347,29 @@ body {
     background-color: var(--veryLightGrey);
 }
 
-#kickbutton {
+.kickbutton {
     width: 30vw;
     left: 35vw;
     height: 10vh;
     top: 55vh;
     background-color: var(--veryLightRed);
 }
-#kickbutton:hover {
+.kickbutton:hover {
     background-color: var(--lightRed);
 }
-#kickbutton:active {
+.kickbutton:active {
     transform: scale(110%);
 }
-#cancelkickbutton {
+.cancelkickbutton {
     width: 30vw;
     left: 35vw;
     height: 10vh;
     top: 45vh;
     background-color: var(--veryLightGrey);
 }
-#cancelkickbutton:hover {
+.cancelkickbutton:hover {
     background-color: var(--lightGrey);
 }
-#cancelkickbutton:active {
+.cancelkickbutton:active {
     transform: scale(110%);
 }

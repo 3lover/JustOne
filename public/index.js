@@ -10,6 +10,10 @@ async function fetchProtocol() {
 }
 await fetchProtocol();
 
+function toggleCorrectness() {
+    document.getElementById("markcorrectpopup").classList.remove("hidden");
+}
+
 // the class used to instantiate our websocket connection, holding our events and how to handle server data
 class Socket {
     constructor() {
@@ -132,6 +136,7 @@ class Socket {
                         document.getElementById("wordinput").disabled = false;
                         document.getElementById("wordinput").value = "";
                         document.getElementById("wordinput").classList.remove("correctlyguessed", "incorrectlyguessed");
+                        document.getElementById("wordinput").removeEventListener("mousedown", toggleCorrectness);
                         document.getElementById("wordsubmit").disabled = false;
                         document.getElementById("wordsubmit").classList.remove("nextcardstyle");
 
@@ -245,8 +250,9 @@ class Socket {
                         }
 
                         document.getElementById("wordholder").innerText = d[4];
-                        document.getElementById("wordinput").disabled = true;
                         document.getElementById("wordinput").value = d[6];
+                        document.getElementById("wordinput").addEventListener("mousedown", toggleCorrectness);
+                        document.getElementById("wordinput").disabled = false;
                         document.getElementById("wordsubmit").disabled = false;
                         document.getElementById("wordsubmit").innerText = "Next Card";
                         document.getElementById("wordsubmit").classList.add("nextcardstyle");
@@ -272,6 +278,11 @@ class Socket {
                     });
                     document.getElementById("removewordholder").appendChild(holder);
                 }
+                break;
+            }
+            // tells a player they've been kicked
+            case protocol.client.kicked: {
+                document.getElementById("disconnectedpopup").classList.remove("hidden");
                 break;
             }
             // the server has sent an unknown packet header, due to some error. Log the header of the packet for troubleshooting
@@ -336,4 +347,8 @@ document.getElementById("cancelkickbutton").addEventListener("click", function(e
 document.getElementById("kickbutton").addEventListener("click", function(e) {
     document.getElementById("kickwindow").classList.add("hidden");
     socket.talk(encodePacket([protocol.server.kickPlayer, kicktarget], ["int8", "int8"]));
+});
+document.getElementById("markcorrectbutton").addEventListener("click", function(e) {
+    document.getElementById("markcorrectpopup").classList.add("hidden");
+    socket.talk(encodePacket([protocol.server.markCorrect], ["int8"]));
 });

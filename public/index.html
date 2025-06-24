@@ -55,8 +55,22 @@
         <div id="removewordholder" class="popup" style="top: 20vh; height: 60vh;">
             Do you want to kick this player from the lobby?
         </div>
-        <button id="cancelkickbutton">Cancel</button>
-        <button id="kickbutton">Kick</button>
+        <button id="cancelkickbutton" class="cancelkickbutton">Cancel</button>
+        <button id="kickbutton" class="kickbutton">Kick</button>
+    </div>
+    <div id="markcorrectpopup" class="page hidden">
+        <div class="pagecover"></div>
+        <div id="removewordholder" class="popup" style="top: 20vh; height: 60vh;">
+            Do you want to mark this answer correct?
+        </div>
+        <button id="cancelmarkcorrectbutton" class="cancelkickbutton">Cancel</button>
+        <button id="markcorrectbutton" class="kickbutton">Mark Correct</button>
+    </div>
+    <div id="disconnectedpopup" class="page hidden">
+        <div class="pagecover"></div>
+        <div id="removewordholder" class="popup center" style="top: 20vh; height: 60vh;">
+            You have been kicked/removed from the game<br>please reload to rejoin
+        </div>
     </div>
 </body>
 <script src="index.js" type="module"></script>
