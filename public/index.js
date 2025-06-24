@@ -24,7 +24,7 @@ class Socket {
     // attempts to form a connection with the websocket server (wss), if one doesn't already exist
     connect() {
         if (this.socket !== null) return;
-        this.socket = new WebSocket("wss://" + location.host + "/wss");
+        this.socket = new WebSocket("wss://" + location.host + "/ws");
         this.socket.binaryType = "arraybuffer";
         this.socket.onopen = () => this.open();
         this.socket.onmessage = (data) => this.message(data);

@@ -6,6 +6,8 @@ const privateKey = fs.readFileSync("./security/localhost-key.pem");
 const certificate = fs.readFileSync("./security/localhost.pem");
 const WebSocket = require("express-ws");
 const express = require('express');
+const compression = require("compression");
+const cors = require("cors");
 const app = express();
 
 // allows us to use our modules for packet coding, protocol headers, and utility functions
@@ -396,7 +398,7 @@ const sockets = {
     }
 }
 
-// uses our credentials to create an https server
+/*// uses our credentials to create an https server
 const credentials = { key: privateKey, cert: certificate };
 
 app.use(express.static("public"));
@@ -413,4 +415,23 @@ app.ws("/wss", sockets.connect);
 httpServer.listen(8080);
 httpsServer.listen(8443, () => {
     console.log("Server running on port 8443")
-});
+});*/
+const site = ((port, connect) => {
+    WebSocket(app);
+    
+    app.ws("/ws", connect);
+    
+    app.use(compression());
+    //app.use(minify());
+    app.use(cors());
+    app.use(express.static("public"));
+    app.use(express.json());
+    
+    app.listen(port, () => console.log("Express is now active on port %s", port));
+    return (directory, callback) => app.get(directory, callback);
+  })(3000, sockets.connect);
+  
+  app.use(express.static("public"));
+  app.get("/", (req, res) => {
+      res.sendFile(__dirname + "/public/index.html");
+  });
