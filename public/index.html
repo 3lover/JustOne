@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Just One</title>
+    <meta name="description" content="Oh lord, oh fuck, 3love is coding something again.">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="icon.png">
+    <link href="style.css" rel="stylesheet" type="text/css">
+
+    <!-- google font families -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=JetBrains Mono" rel="stylesheet">
+</head>
+
+<body oncontextmenu="return false;">
+    <div id="gamepage" class="page hidden">
+        <div id="playerlist">
+            <div class="playerholder center">1love</div>
+            <div class="playerholder center">2love</div>
+            <div class="playerholder center">3love</div>
+            <div class="playerholder center">4love</div>
+        </div>
+        <div id="scoreholder"></div>
+        <div id="lobbycodeholder"></div>
+        <div id="infoholder" class="center"></div>
+        <div id="wordholder" class="center bold"></div>
+        <input id="wordinput" class="wordinput" placeholder="Type Your Hint" maxlength="20" class="hidden">
+        <button id="wordsubmit" class="wordsubmit hidden">Submit</button>
+        <div id="hintholder"></div>
+    </div>
+    <div id="frontpage" class="page">
+        <input id="playernameinput" class="frontpageelement" placeholder="Enter Your Name">
+        <input id="lobbycodeinput" class="frontpageelement" placeholder="Enter Lobby Code">
+        <button id="findlobbybutton" class="frontpageelement">Find Lobby</button>
+    </div>
+    <div id="startgamepopup" class="page hidden">
+        <div class="pagecover"></div>
+        <div class="popup" id="startgametext">
+            Click to start the game
+        </div>
+        <button id="startgamebutton">Ready!</button>
+    </div>
+    <div id="removewordpopup" class="page hidden">
+        <div class="pagecover"></div>
+        <div id="removewordholder" class="popup" style="top: 20vh; height: 60vh;">
+            Click on a word to remove it
+        </div>
+    </div>
+    <div id="kickwindow" class="page hidden">
+        <div class="pagecover"></div>
+        <div id="removewordholder" class="popup" style="top: 20vh; height: 60vh;">
+            Do you want to kick this player from the lobby?
+        </div>
+        <button id="cancelkickbutton">Cancel</button>
+        <button id="kickbutton">Kick</button>
+    </div>
+</body>
+<script src="index.js" type="module"></script>
+
+</html>

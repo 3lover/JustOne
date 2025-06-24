@@ -1,0 +1,25 @@
+{
+    "name": "rubixcube",
+    "version": "0.1.0",
+    "description": "WebGPU Testing",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js"
+    },
+    "author": "3love",
+    "license": "ISC",
+    "dependencies": {
+      "@types/node": "latest",
+      "compression": "latest",
+      "cors": "latest",
+      "express": "latest",
+      "express-ws": "latest",
+      "express-minify": "latest",
+      "an-array-of-english-words": "latest",
+      "popular-english-words": "latest"
+    },
+    "engines": {
+      "node": "16.x"
+    },
+    "keywords": []
+  }

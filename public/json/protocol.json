@@ -1,0 +1,17 @@
+{
+    "client": {
+        "connected": 0,
+        "lobbyJoined": 1,
+        "update": 2,
+        "removeCard": 3
+    },
+    "server": {
+        "createLobby": 0,
+        "startGame": 1,
+        "cardRemoved": 2,
+        "submitClue": 3,
+        "removeClue": 4,
+        "sendClues": 5,
+        "kickPlayer": 6
+    }
+}

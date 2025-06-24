@@ -1,0 +1,375 @@
+:root {
+    --black: #000000;
+    --veryDarkGrey: #333333;
+    --darkGrey: #555555;
+    --grey: #888888;
+    --lightGrey: #aaaaaa;
+    --veryLightGrey: #dddddd;
+    --white: #ffffff;
+
+    --red: #ff0000;
+    --lightRed: #fa5f5f;
+    --veryLightRed: #ffb8b8;
+    --darkRed: #a80000;
+    --veryDarkRed: #690000;
+    --greyRed: #825b5b;
+
+    --orange: #ff8800;
+    --lightOrange: #ffb663;
+    --veryLightOrange: #ffdeb8;
+    --darkOrange: #c26700;
+    --veryDarkOrange: #7a4100;
+    --greyOrange: #755a3b;
+
+    --yellow: #ffff00;
+    --lightYellow: #ffff6e;
+    --veryLightYellow: #ffffc9;
+    --darkYellow: #a6a600;
+    --veryDarkYellow: #636300;
+    --greyYellow: #8c8c58;
+
+    --green: #00ff00;
+    --lightGreen: #59ff59;
+    --veryLightGreen: #b8ffb8;
+    --darkGreen: #00ab00;
+    --veryDarkGreen: #005200;
+    --greyGreen: #608f60;
+
+    --cyan: #00ffff;
+    --lightCyan: #6bffff;
+    --veryLightCyan: #baffff;
+    --darkCyan: #00b0b0;
+    --veryDarkCyan: #005c5c;
+    --greyCyan: #4f7878;
+
+    --blue: #0000ff;
+    --lightBlue: #5c5cff;
+    --veryLightBlue: #c2d9ff;
+    --darkBlue: #0047ba;
+    --veryDarkBlue: #002259;
+    --greyBlue: #4b5d7a;
+
+    --purple: #8800ff;
+    --lightPurple: #ad4fff;
+    --veryLightPurple: #deb8ff;
+    --darkPurple: #54009e;
+    --veryDarkPurple: #2e0057;
+    --greyPurple: #574369;
+
+    --pink: #ff00ff;
+    --lightPink: #ff6bff;
+    --veryLightPink: #ffb8ff;
+    --darkPink: #bd00bd;
+    --veryDarkPink: #630063;
+    --greyPink: #784a78;
+}
+
+@font-face {
+    font-family: 'Jetbrains Mono';
+    src: url('https://fonts.googleapis.com/css?family=JetBrains Mono');
+}
+
+* {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+    font-family: "JetBrains Mono", sans-serif;
+    user-select: none;
+    box-shadow: none;
+    appearance: none;
+    border: 0;
+    outline: 0;
+    font-size: 4vh;
+    text-align: center;
+    transition: 0.2s;
+    pointer-events: auto;
+}
+
+body {
+    position: static;
+}
+
+.page {
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.hidden {
+    display: none;
+}
+
+.center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bold {
+    font-weight: bold;
+    position: absolute;
+    top: 15vh;
+}
+
+#playerlist {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20vw;
+    height: 100vh;
+    background-color: var(--lightGrey);
+}
+.playerholder {
+    position: static;
+    width: 20vw;
+    height: 10vh;
+}
+.playerholder:hover {
+    background-color: var(--veryLightGrey);
+}
+
+#infoholder {
+    position: absolute;
+    left: 20vw;
+    top: 10vh;
+    width: 80vw;
+    height: 30vh;
+}
+
+#wordholder {
+    position: absolute;
+    left: 20vw;
+    top: 30vh;
+    width: 80vw;
+    height: 15vh;
+    background-color: var(--veryLightGrey);
+}
+
+.wordinput {
+    position: absolute;
+    left: 20vw;
+    top: 45vh;
+    width: 80vw;
+    height: 10vh;
+    background-color: var(--veryLightBlue);
+}
+
+.wordsubmit {
+    position: absolute;
+    left: 20vw;
+    top: 55vh;
+    width: 80vw;
+    height: 10vh;
+    background-color: var(--veryLightGreen);
+}
+.wordsubmit:hover {
+    background-color: var(--lightGreen);
+}
+.wordsubmit:active {
+    background-color: var(--lightRed);
+}
+
+.wordsubmitreadystate {
+    background-color: var(--veryLightRed);
+}
+.wordsubmitreadystate:hover {
+    background-color: var(--lightRed);
+}
+.wordsubmitreadystate:active {
+    background-color: var(--lightGreen);
+}
+
+.frontpageelement {
+    background-color: var(--lightGrey);
+}
+.frontpageelement:hover {
+    background-color: var(--veryLightGrey);
+}
+.frontpageelement:active {
+    transform: scale(110%);
+}
+
+#playernameinput {
+    width: 40vw;
+    height: 10vh;
+    left: 30vw;
+    top: 30vh;
+}
+
+#lobbycodeinput {
+    width: 40vw;
+    height: 10vh;
+    left: 30vw;
+    top: 45vh;
+}
+
+#findlobbybutton {
+    width: 40vw;
+    height: 10vh;
+    left: 30vw;
+    top: 60vh;
+}
+
+.pagecover {
+    position: absolute;
+    left: 20vw;
+    top: 0;
+    width: 80vw;
+    height: 100vh;
+    opacity: 0.7;
+    background-color: var(--black);
+}
+
+.popup {
+    left: 30vw;
+    top: 30vh;
+    width: 40vw;
+    height: 40vh;
+    background-color: var(--white);
+    overflow-y: scroll;
+}
+
+#startgamebutton {
+    width: 30vw;
+    left: 35vw;
+    height: 10vh;
+    top: 45vh;
+    background-color: var(--veryLightGreen);
+}
+#startgamebutton:hover {
+    background-color: var(--lightGreen);
+}
+#startgamebutton:active {
+    transform: scale(110%);
+}
+
+.removableword {
+    width: 30vw;
+    left: 5vw;
+    position: relative;
+    top: 5vh;
+}
+.removableword:hover {
+    text-decoration: line-through;
+    color: var(--darkRed);
+    background-color: var(--veryLightGrey);
+}
+
+.unremovedword {
+    width: 30vw;
+    left: 5vw;
+    position: relative;
+    top: 5vh;
+}
+.unremovedword:hover {
+    background-color: var(--veryLightGrey);
+}
+.removedword {
+    width: 30vw;
+    left: 5vw;
+    position: relative;
+    top: 5vh;
+    text-decoration: line-through;
+    color: var(--darkRed);
+    background-color: var(--veryLightGrey);
+}
+.removedword:hover {
+    background-color: var(--white);
+}
+
+.finishedremovingbutton {
+    width: 30vw;
+    left: 5vw;
+    position: relative;
+    top: 10vh;
+    background-color: var(--veryLightGreen);
+}
+.finishedremovingbutton:hover {
+    background-color: var(--lightGreen);
+}
+.finishedremovingbutton:active {
+    transform: scale(110%);
+}
+
+#hintholder {
+    top: 65vh;
+    left: 20vw;
+    height: 35vh;
+    width: 80vw;
+    overflow-y: scroll;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.hintbox {
+    position: static;
+    height: 12vh;
+}
+.hintname {
+    color: var(--grey);
+    font-size: 3vmin;
+    margin-bottom: 4vmin;
+}
+
+.correctlyguessed {
+    background-color: var(--lightGreen);
+}
+.incorrectlyguessed {
+    background-color: var(--lightRed);
+}
+.nextcardstyle {
+    background-color: var(--lightYellow);
+}
+.nextcardstyle:hover {
+    background-color: var(--darkYellow);
+}
+
+#lobbycodeholder {
+    top: 0;
+    left: 20vw;
+    width: 40vw;
+    height: 10vh;
+    text-align: left;
+    padding-left: 2vw;
+    background-color: var(--veryLightGrey);
+}
+#scoreholder {
+    top: 0;
+    left: 60vw;
+    width: 40vw;
+    height: 10vh;
+    text-align: right;
+    padding-right: 2vw;
+    background-color: var(--veryLightGrey);
+}
+
+#kickbutton {
+    width: 30vw;
+    left: 35vw;
+    height: 10vh;
+    top: 55vh;
+    background-color: var(--veryLightRed);
+}
+#kickbutton:hover {
+    background-color: var(--lightRed);
+}
+#kickbutton:active {
+    transform: scale(110%);
+}
+#cancelkickbutton {
+    width: 30vw;
+    left: 35vw;
+    height: 10vh;
+    top: 45vh;
+    background-color: var(--veryLightGrey);
+}
+#cancelkickbutton:hover {
+    background-color: var(--lightGrey);
+}
+#cancelkickbutton:active {
+    transform: scale(110%);
+}
