@@ -13,7 +13,7 @@ const app = express();
 // allows us to use our modules for packet coding, protocol headers, and utility functions
 const protocol = require("./public/json/protocol.json");
 const p = require("./serverProtocol");
-let sortedWordArray = require("./words").words.splice(500, 6000);
+let sortedWordArray = require("./words").words;
 
 // the player class
 class Player {
