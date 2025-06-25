@@ -137,6 +137,7 @@ class Socket {
                         document.getElementById("wordinput").value = "";
                         document.getElementById("wordinput").classList.remove("correctlyguessed", "incorrectlyguessed");
                         document.getElementById("wordinput").removeEventListener("mousedown", toggleCorrectness);
+                        document.getElementById("wordinput").placeholder = "Type Your Hint";
                         document.getElementById("wordsubmit").disabled = false;
                         document.getElementById("wordsubmit").classList.remove("nextcardstyle");
 
@@ -214,11 +215,11 @@ class Socket {
                         document.getElementById("wordinput").classList.remove("hidden");
                         document.getElementById("wordsubmit").classList.remove("hidden");
                         document.getElementById("removewordpopup").classList.add("hidden");
+                        document.getElementById("wordinput").placeholder = "Type Your Guess";
                         for (let i = 0; i < d[1].length; i += 7) {
-                            if (d[1][i + 4]) document.getElementById("infoholder").innerText = `${d[1][i + 0]} is guessing\nWriters are confirming words`;
+                            if (d[1][i + 4]) document.getElementById("infoholder").innerText = `${d[1][i + 0]} is guessing`;
                             if (!d[1][i + 6]) continue;
                             if (d[1][i + 4]) {
-                                document.getElementById("wordsubmit").placeholder = "Type Your Guess";
                             } else {
                                 document.getElementById("wordinput").disabled = true;
                                 document.getElementById("wordsubmit").disabled = true;
@@ -351,4 +352,7 @@ document.getElementById("kickbutton").addEventListener("click", function(e) {
 document.getElementById("markcorrectbutton").addEventListener("click", function(e) {
     document.getElementById("markcorrectpopup").classList.add("hidden");
     socket.talk(encodePacket([protocol.server.markCorrect], ["int8"]));
+});
+document.getElementById("cancelmarkcorrectbutton").addEventListener("click", function(e) {
+    document.getElementById("markcorrectpopup").classList.add("hidden");
 });
