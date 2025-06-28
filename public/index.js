@@ -414,3 +414,9 @@ document.getElementById("markcorrectbutton").addEventListener("click", function(
 document.getElementById("cancelmarkcorrectbutton").addEventListener("click", function(e) {
     document.getElementById("markcorrectpopup").classList.add("hidden");
 });
+
+document.getElementById("wordinput").addEventListener("input", function(e) {
+    if (document.getElementById("wordinput").value.indexOf(" ") !== -1) {
+        document.getElementById("wordinput").value = document.getElementById("wordinput").value.replace(/\s/g, '');
+    }
+});
