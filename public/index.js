@@ -37,6 +37,10 @@ function resetInputs() {
     document.getElementById("wordinput").placeholder = "Type Your Hint";
     document.getElementById("wordsubmit").disabled = false;
     document.getElementById("wordsubmit").classList.remove("nextcardstyle");
+
+    document.getElementById("removewordpopup").classList.add("hidden");
+    document.getElementById("markcorrectpopup").classList.add("hidden");
+    document.getElementById("kickwindow").classList.add("hidden");
 }
 
 // the class used to instantiate our websocket connection, holding our events and how to handle server data
@@ -49,7 +53,7 @@ class Socket {
     // attempts to form a connection with the websocket server (wss), if one doesn't already exist
     connect() {
         if (this.socket !== null) return;
-        this.socket = new WebSocket("wss://" + location.host + "/ws");
+        this.socket = new WebSocket("wss://" + location.host + "/wss");
         this.socket.binaryType = "arraybuffer";
         this.socket.onopen = () => this.open();
         this.socket.onmessage = (data) => this.message(data);
@@ -107,7 +111,7 @@ class Socket {
                 while (document.getElementById("playerlist").children.length > 0) {
                     document.getElementById("playerlist").lastChild.remove();
                 }
-                for (let i = 0; i < d[1].length; i += 7) {
+                for (let i = 0; i < d[1].length; i += 9) {
                     let holder = document.createElement("div");
                     holder.classList.add("playerholder", "center");
                     holder.innerText = d[1][i + 0];
@@ -120,9 +124,6 @@ class Socket {
                     }
                     if (d[1][i + 6]) {
                         holder.style.color = "var(--purple)";
-                    }
-                    if (d[1][i + 7]) {
-                        holder.innerText += " #";
                     }
                     if (d[1][i + 4]) {
                         holder.innerText += " ?";
@@ -143,8 +144,10 @@ class Socket {
                     case 0: {
                         console.log("lobby phase");
                         resetInputs();
+                        
+                        document.getElementById("startgamepopup").classList.remove("hidden");
 
-                        for (let i = 0; i < d[1].length; i += 7) {
+                        for (let i = 0; i < d[1].length; i += 9) {
                             if (!d[1][i + 6]) continue;
                             if (d[1][i + 5]) {
                                 document.getElementById("startgametext").innerText = "Click to start the game";
@@ -167,12 +170,12 @@ class Socket {
                         document.getElementById("startgamepopup").classList.add("hidden");
                         let guessor = "An Unknown Player";
                         let remover = "An Unknown Player";
-                        for (let i = 0; i < d[1].length; i += 7) {
+                        for (let i = 0; i < d[1].length; i += 9) {
                             if (d[1][i + 4]) guessor = i;
                             if (d[1][i + 8]) remover = i;
                             if (!d[1][i + 6]) continue;
-                            if (d[1][i + 4]) {
-                                document.getElementById("removewordpopup").classList.add("hidden");
+                            if (d[1][i + 8]) {
+                                document.getElementById("removewordpopup").classList.remove("hidden");
                             }
                         }
                         document.getElementById("infoholder").innerText = `${d[1][guessor]} is guessing\n${d[1][remover]} is currently removing a word`;
@@ -184,7 +187,7 @@ class Socket {
                         document.getElementById("startgamepopup").classList.add("hidden");
                         document.getElementById("removewordpopup").classList.add("hidden");
                         let waiting = [];
-                        for (let i = 0; i < d[1].length; i += 7) {
+                        for (let i = 0; i < d[1].length; i += 9) {
                             if (d[1][i + 3]) waiting.push(i);
                             if (d[1][i + 4]) document.getElementById("infoholder").innerText = `${d[1][i + 0]} is guessing\n`;
                             if (!d[1][i + 6]) continue;
@@ -212,25 +215,32 @@ class Socket {
                     // filtering
                     case 3: {
                         console.log("removal phase");
-                        for (let i = 0; i < d[1].length; i += 7) {
-                            if (d[1][i + 4]) document.getElementById("infoholder").innerText = `${d[1][i + 0]} is guessing\nWriters are confirming words`;
+                        let guessor = null;
+                        let filterer = null;
+                        while (document.getElementById("hintholder").children.length > 0) {
+                            document.getElementById("hintholder").lastChild.remove();
+                        }
+                        for (let i = 0; i < d[1].length; i += 9) {
+                            if (d[1][i + 4]) guessor = i;
+                            if (d[1][i + 7]) filterer = i;
                             if (!d[1][i + 6]) continue;
-                            if (d[1][i + 4]) {
+                            if (d[1][i + 4]) continue;
 
-                            } else {
-                                document.getElementById("removewordpopup").classList.remove("hidden");
-                                while (document.getElementById("removewordholder").children.length > 0) {
-                                    document.getElementById("removewordholder").lastChild.remove();
-                                }
-                                for (let clue of d[8]) {
-                                    let holder = document.createElement("div");
-                                    holder.classList.add(clue[0] === "!" ? "removedword" : "unremovedword");
-                                    holder.innerText = clue.substring(1);
-                                    holder.addEventListener("click", function(e) {
-                                        socket.talk(encodePacket([protocol.server.removeClue, clue], ["int8", "string"]));
-                                    });
-                                    document.getElementById("removewordholder").appendChild(holder);
-                                }
+                            document.getElementById("removewordpopup").classList.remove("hidden");
+                            while (document.getElementById("removewordholder").children.length > 1) {
+                                document.getElementById("removewordholder").lastChild.remove();
+                            }
+                            for (let c = 0; c < d[8].length; c += 2) {
+                                let holder = document.createElement("div");
+                                holder.classList.add(d[8][c][0] === "!" ? "removedword" : "unremovedword");
+                                holder.innerText = d[8][c].substring(1);
+                                holder.title = d[8][c + 1];
+                                holder.addEventListener("click", function(e) {
+                                    socket.talk(encodePacket([protocol.server.removeClue, d[8][c]], ["int8", "string"]));
+                                });
+                                document.getElementById("removewordholder").appendChild(holder);
+                            }
+                            if (d[1][i + 7]) {
                                 let holder = document.createElement("div");
                                 holder.classList.add("finishedremovingbutton");
                                 holder.innerText = "Send Clues";
@@ -240,6 +250,8 @@ class Socket {
                                 document.getElementById("removewordholder").appendChild(holder);
                             }
                         }
+                        document.getElementById("infoholder").innerText = `${d[1][guessor]} is guessing\n${d[1][filterer]} is filtering the words`;
+                        document.getElementById("removewordholdertext").innerText = `${d[1][filterer]} is filtering words`;
                         break;
                     }
                     // guessing
@@ -249,7 +261,7 @@ class Socket {
                         document.getElementById("wordsubmit").classList.remove("hidden");
                         document.getElementById("removewordpopup").classList.add("hidden");
                         document.getElementById("wordinput").placeholder = "Type Your Guess";
-                        for (let i = 0; i < d[1].length; i += 7) {
+                        for (let i = 0; i < d[1].length; i += 9) {
                             if (d[1][i + 4]) document.getElementById("infoholder").innerText = `${d[1][i + 0]} is guessing`;
                             if (!d[1][i + 6]) continue;
                             if (d[1][i + 4]) {
@@ -265,6 +277,7 @@ class Socket {
                             let holder = document.createElement("div");
                             holder.classList.add("hintbox", "center");
                             holder.innerHTML = `<span class="hintname">${d[8][i + 1]}</span><br>${d[8][i + 0].substring(1)}`;
+                            if (d[8][i + 0].substring(1) === "X") holder.style.color = "red";
                             document.getElementById("hintholder").appendChild(holder);
                         }
                         break;
@@ -299,7 +312,7 @@ class Socket {
             case protocol.client.removeCard: {
                 const d = decodePacket(reader, ["int8", "repeat", "string", "end"]);
                 document.getElementById("removewordpopup").classList.remove("hidden");
-                while (document.getElementById("removewordholder").children.length > 0) {
+                while (document.getElementById("removewordholder").children.length > 1) {
                     document.getElementById("removewordholder").lastChild.remove();
                 }
                 for (let word of d[1]) {
@@ -354,12 +367,16 @@ document.getElementById("wordsubmit").addEventListener("click", function(e) {
     readyState *= -1;
     if (readyState === 1) {
         document.getElementById("wordsubmit").classList.remove("wordsubmitreadystate");
-        document.getElementById("wordsubmit").innerText = "Submit";
+        if (!document.getElementById("wordsubmit").classList.contains("nextcardstyle")){
+            document.getElementById("wordsubmit").innerText = "Submit";
+        }
         socket.talk(encodePacket([protocol.server.submitClue, "", 1], ["int8", "string", "int8"]));
     }
     else {
         document.getElementById("wordsubmit").classList.add("wordsubmitreadystate");
-        document.getElementById("wordsubmit").innerText = "Unsubmit";
+        if (!document.getElementById("wordsubmit").classList.contains("nextcardstyle")){
+            document.getElementById("wordsubmit").innerText = "Unsubmit";
+        }
         socket.talk(encodePacket([protocol.server.submitClue, document.getElementById("wordinput").value, 0], ["int8", "string", "int8"]));
     }
 });

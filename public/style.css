@@ -115,6 +115,10 @@ body {
     top: 15vh;
 }
 
+.leftalign {
+    text-align: left;
+}
+
 #playerlist {
     position: absolute;
     left: 0;
@@ -372,4 +376,10 @@ body {
 }
 .cancelkickbutton:active {
     transform: scale(110%);
+}
+
+#removewordholdertext {
+    position: static;
+    text-align: center;
+    width: 100%;
 }

@@ -74,10 +74,13 @@ class Lobby {
 
     kickPlayer(player) {
         this.reset();
+        console.log(`player with name ${player.name} kicked!`);
         player.socket.talk(p.encodePacket([protocol.client.kicked], ["int8"]))
         this.players.splice(this.players.indexOf(player), 1);
+        player.lobby = null;
         if (this.players.length === 0) {
             Lobby.lobbies.splice(Lobby.lobbies.indexOf(this));
+            console.log(`Lobby with code ${this.code} deleted`);
             return;
         }
         if (player.host) this.players[Math.floor(this.players.length * Math.random())].host = true;
@@ -125,7 +128,7 @@ class Lobby {
         if (this.playerIndex >= this.players.length) this.playerIndex = 0;
         this.guessor = this.removingPlayers.splice(this.playerIndex, 1)[0];
         this.guessor.guessor = true;
-        if (this.playerIndex + 1 >= this.players.length) this.players[this.playerIndex + 1].clueFilterer = true;
+        if (this.playerIndex + 1 < this.players.length) this.players[this.playerIndex + 1].clueFilterer = true;
         else this.players[0].clueFilterer = true;
         this.removeOption();
     }
@@ -150,14 +153,15 @@ class Lobby {
         for (let player of this.players) {
             if (player.guessor) continue;
             let addWord = true;
-            for (let h of this.hints) {
-                if (h.substring(1) == player.clue.toLowerCase()) {
-                    this.hints[this.hints.indexOf(h)] = "!" + h.substring(1);
+            for (let i = 0; i < this.hints.length; i += 2) {
+                if (this.hints[i].substring(1) == player.clue.toLowerCase()) {
+                    this.hints[i] = "!" + this.hints[i].substring(1);
                     addWord = false;
                 }
             }
-            if (addWord) this.hints.push("-" + player.clue.toLowerCase());
+            this.hints.push((addWord ? "-" : "!") + player.clue.toLowerCase(), player.name);
         }
+        console.log(`sending out ${JSON.stringify(this.hints)}`);
         this.updateState();
     }
 
@@ -165,13 +169,8 @@ class Lobby {
         console.log("guessing phase");
         if (this.gamePhase !== 3) return;
         this.gamePhase = 4;
-        for (let i = this.hints.length - 1; i >= 0; i--) {
-            if (this.hints[i][0] === "!") this.hints.splice(i, 1);
-            else {
-                for (let player of this.players) {
-                    if (player.clue.toLowerCase() == this.hints[i].toLowerCase.substring(1)) this.hints.splice(i + 1, 0, player.name);
-                }
-            }
+        for (let i = this.hints.length - 1; i >= 0; i -= 2) {
+            if (this.hints[i - 1][0] === "!") this.hints[i - 1] = "-X";
         }
         console.log(this.hints);
         this.updateState();
@@ -180,13 +179,15 @@ class Lobby {
     removeOption(removedWord) {
         if (this.gamePhase !== 1) return;
         console.log(`remaining options: ${this.cardOptions}`)
-        if (this.cardOptions.indexOf(removedWord) !== -1) this.cardOptions.splice(this.cardOptions.indexOf(removedWord), 1);
-        else {
-            console.log(`Attempted to remove a word (${removedWord}) which could not be found.`);
-            console.log("the game has been sent to a waiting state.");
-            this.reset();
-            this.updateState();
-            return;
+        if (removedWord !== undefined) {
+            if (this.cardOptions.indexOf(removedWord) !== -1) this.cardOptions.splice(this.cardOptions.indexOf(removedWord), 1);
+            else {
+                console.log(`Attempted to remove a word (${removedWord}) which could not be found.`);
+                console.log("the game has been sent to a waiting state.");
+                this.reset();
+                this.updateState();
+                return;
+            }
         }
         if (this.cardOptions.length <= 1) {
             this.startWriting();
@@ -203,6 +204,7 @@ class Lobby {
         let remover = this.removingPlayers.splice(Math.floor(this.removingPlayers.length * Math.random()), 1)[0];
         for (let i of this.players) i.removingOption = false;
         remover.removingOption = true;
+        console.log(`${remover.name} is removing a word`)
         let data = [protocol.client.removeCard];
         data.push(this.cardOptions.length);
         for (let word of this.cardOptions) data.push(word);
@@ -249,10 +251,10 @@ class Lobby {
 
     toggleClue(clue) {
         if (this.gamePhase !== 3) return;
-        for (let hint of this.hints) {
-            if (clue !== hint) continue;
-            this.hints[this.hints.indexOf(clue)] = hint[0] === "!" ? "-" + hint.substring(1) : "!" + hint.substring(1);
-            console.log(`${hint.substring(1)} has been toggled`);
+        for (let i = 0; i < this.hints.length; i += 2) {
+            if (clue !== this.hints[i]) continue;
+            this.hints[this.hints.indexOf(clue)] = this.hints[i][0] == "!" ? `-${this.hints[i].substring(1)}` : `!${this.hints[i].substring(1)}`;
+            console.log(`${this.hints[i].substring(1)} has been toggled`);
         }
         this.updateState();
     }
@@ -270,6 +272,8 @@ class Lobby {
                 data.push(i.guessor ? 1 : 0);
                 data.push(i.host ? 1 : 0);
                 data.push(i === player ? 1 : 0);
+                data.push(i.clueFilterer ? 1 : 0);
+                data.push(i.removingOption ? 1 : 0);
                 i.lobby = this;
             }
             for (let i of this.waitingPlayers) {
@@ -395,7 +399,7 @@ const sockets = {
                     if (!this.playerInstance.host) break;
                     const d = p.decodePacket(reader, ["int8", "int8"]);
                     if (!this.playerInstance.lobby.players[d[1]]) break;
-                    this.playerInstance.lobby.kickPlayer(this.playerInstance.lobby.players[d[1]]);
+                    this.playerInstance.lobby.players[d[1]].socket.close();
                     break;
                 }
                 // if an unknown packet header is found, log the header for potential troubleshooting
@@ -411,8 +415,10 @@ const sockets = {
             if (this.playerInstance) {
                 this.playerInstance.lobby.kickPlayer(this.playerInstance);
             }
+            this.playerInstance = null;
             let myIndex = sockets.clients.indexOf(this);
             if (myIndex >= 0) sockets.clients.splice(myIndex, 1);
+            this.socket.close();
         }
 
         // sends an encoded binary packet to the client, where the information will be decoded
@@ -440,7 +446,7 @@ const sockets = {
     }
 }
 
-/*// uses our credentials to create an https server
+// uses our credentials to create an https server
 const credentials = { key: privateKey, cert: certificate };
 
 app.use(express.static("public"));
@@ -457,7 +463,7 @@ app.ws("/wss", sockets.connect);
 httpServer.listen(8080);
 httpsServer.listen(8443, () => {
     console.log("Server running on port 8443")
-});*/
+});
 const site = ((port, connect) => {
     WebSocket(app);
     
