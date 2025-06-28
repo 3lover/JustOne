@@ -3,6 +3,15 @@ import {decodePacket, encodePacket} from "./clientProtocol.js";
 
 let kicktarget = 0;
 
+if (localStorage.getItem("playername")) document.getElementById("playernameinput").value = localStorage.getItem("playername");
+document.getElementById("playernameinput").addEventListener("change", function(e) {
+    localStorage.setItem("playername", document.getElementById("playernameinput").value);
+});
+if (localStorage.getItem("lobbycode")) document.getElementById("lobbycodeinput").value = localStorage.getItem("lobbycode");
+document.getElementById("lobbycodeinput").addEventListener("change", function(e) {
+    localStorage.setItem("lobbycode", document.getElementById("lobbycodeinput").value);
+});
+
 // our protocol is stored in a json file, so we use async fetching to retrieve it for use
 let protocol = null;
 async function fetchProtocol() {
@@ -12,6 +21,22 @@ await fetchProtocol();
 
 function toggleCorrectness() {
     document.getElementById("markcorrectpopup").classList.remove("hidden");
+}
+
+function resetInputs() {
+    readyState = 1;
+    document.getElementById("wordsubmit").classList.remove("wordsubmitreadystate");
+    document.getElementById("wordsubmit").innerText = "Submit";
+    while (document.getElementById("hintholder").children.length > 0) {
+        document.getElementById("hintholder").lastChild.remove();
+    }
+    document.getElementById("wordinput").disabled = false;
+    document.getElementById("wordinput").value = "";
+    document.getElementById("wordinput").classList.remove("correctlyguessed", "incorrectlyguessed");
+    document.getElementById("wordinput").removeEventListener("mousedown", toggleCorrectness);
+    document.getElementById("wordinput").placeholder = "Type Your Hint";
+    document.getElementById("wordsubmit").disabled = false;
+    document.getElementById("wordsubmit").classList.remove("nextcardstyle");
 }
 
 // the class used to instantiate our websocket connection, holding our events and how to handle server data
@@ -72,7 +97,7 @@ class Socket {
             case protocol.client.update: {
                 const d = decodePacket(reader, [
                     "int8", // header
-                    "repeat", "string", "string", "int8", "int8", "int8", "int8", "int8", "end", // player data
+                    "repeat", "string", "string", "int8", "int8", "int8", "int8", "int8", "int8", "int8", "end", // player data
                     "int8", "int8", "string", "int8", "string", // lobby data
                     "repeat", "string", "end", // card history
                     "repeat", "string", "end", // hints
@@ -93,6 +118,12 @@ class Socket {
                     if (d[1][i + 5]) {
                         holder.innerText += " ☆";
                     }
+                    if (d[1][i + 6]) {
+                        holder.style.color = "var(--purple)";
+                    }
+                    if (d[1][i + 7]) {
+                        holder.innerText += " #";
+                    }
                     if (d[1][i + 4]) {
                         holder.innerText += " ?";
                         holder.style.color = "var(--red)";
@@ -111,6 +142,8 @@ class Socket {
                     // waiting in lobby
                     case 0: {
                         console.log("lobby phase");
+                        resetInputs();
+
                         for (let i = 0; i < d[1].length; i += 7) {
                             if (!d[1][i + 6]) continue;
                             if (d[1][i + 5]) {
@@ -126,32 +159,23 @@ class Socket {
                     // removing words
                     case 1: {
                         console.log("removing phase")
-
-                        readyState = 1;
-                        document.getElementById("wordsubmit").classList.remove("wordsubmitreadystate");
-                        document.getElementById("wordsubmit").innerText = "Submit";
-                        while (document.getElementById("hintholder").children.length > 0) {
-                            document.getElementById("hintholder").lastChild.remove();
-                        }
-                        document.getElementById("wordinput").disabled = false;
-                        document.getElementById("wordinput").value = "";
-                        document.getElementById("wordinput").classList.remove("correctlyguessed", "incorrectlyguessed");
-                        document.getElementById("wordinput").removeEventListener("mousedown", toggleCorrectness);
-                        document.getElementById("wordinput").placeholder = "Type Your Hint";
-                        document.getElementById("wordsubmit").disabled = false;
-                        document.getElementById("wordsubmit").classList.remove("nextcardstyle");
+                        resetInputs();
 
                         document.getElementById("wordholder").innerHTML = `???`;
                         document.getElementById("wordinput").classList.add("hidden");
                         document.getElementById("wordsubmit").classList.add("hidden");
                         document.getElementById("startgamepopup").classList.add("hidden");
+                        let guessor = "An Unknown Player";
+                        let remover = "An Unknown Player";
                         for (let i = 0; i < d[1].length; i += 7) {
-                            if (d[1][i + 4]) document.getElementById("infoholder").innerText = `${d[1][i + 0]} is guessing\nThe writers are selecting a word`;
+                            if (d[1][i + 4]) guessor = i;
+                            if (d[1][i + 8]) remover = i;
                             if (!d[1][i + 6]) continue;
                             if (d[1][i + 4]) {
                                 document.getElementById("removewordpopup").classList.add("hidden");
                             }
                         }
+                        document.getElementById("infoholder").innerText = `${d[1][guessor]} is guessing\n${d[1][remover]} is currently removing a word`;
                         break;
                     }
                     // writing
@@ -159,9 +183,9 @@ class Socket {
                         console.log("writing phase");
                         document.getElementById("startgamepopup").classList.add("hidden");
                         document.getElementById("removewordpopup").classList.add("hidden");
-                        let waiting = 0;
+                        let waiting = [];
                         for (let i = 0; i < d[1].length; i += 7) {
-                            if (d[1][i + 3]) waiting++;
+                            if (d[1][i + 3]) waiting.push(i);
                             if (d[1][i + 4]) document.getElementById("infoholder").innerText = `${d[1][i + 0]} is guessing\n`;
                             if (!d[1][i + 6]) continue;
                             if (d[1][i + 4]) {
@@ -173,7 +197,16 @@ class Socket {
                                 document.getElementById("wordsubmit").classList.remove("hidden");
                             }
                         }
-                        document.getElementById("infoholder").innerText = `Waiting on ${waiting} writers`;
+                        document.getElementById("infoholder").innerText = `Waiting on ${waiting.length} writers`;
+                        while (document.getElementById("hintholder").children.length > 0) {
+                            document.getElementById("hintholder").lastChild.remove();
+                        }
+                        for (let i of waiting) {
+                            let holder = document.createElement("div");
+                            holder.classList.add("hintbox", "center");
+                            holder.innerHTML = d[1][i];
+                            document.getElementById("hintholder").appendChild(holder);
+                        }
                         break;
                     }
                     // filtering
@@ -331,6 +364,14 @@ document.getElementById("wordsubmit").addEventListener("click", function(e) {
     }
 });
 document.getElementById("findlobbybutton").addEventListener("click", function(e) {
+    if (document.getElementById("playernameinput").value === "") {
+        alert("Please give yourself a name");
+        return;
+    }
+    if (document.getElementById("lobbycodeinput").value === "") {
+        alert("Please give the lobby a code");
+        return;
+    }
     socket.talk(encodePacket(
         [protocol.server.createLobby, document.getElementById("lobbycodeinput").value, document.getElementById("playernameinput").value],
         ["int8", "string", "string"]

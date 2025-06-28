@@ -27,6 +27,8 @@ class Player {
         this.guessor = false;
         this.host = false;
         this.lobby = null;
+        this.clueFilterer = false;
+        this.removingOption = false;
     }
 }
 
@@ -47,9 +49,11 @@ class Lobby {
         this.gamePhase = 0;
         this.removingPlayers = [];
         this.hints = [];
+        this.playerIndex = 0;
         this.correctGuess = true;
         hostingPlayer.socket.talk(p.encodePacket([protocol.client.lobbyJoined, this.code, 1], ["int8", "string", "int8"]));
         this.updateState();
+        console.log(`${hostingPlayer.name} created a new lobby with code ${this.code}. There are ${Lobby.lobbies.length + 1} open lobbies now`);
     }
 
     static findCode(code, joiningPlayer) {
@@ -64,6 +68,7 @@ class Lobby {
     addPlayer(joiningPlayer) {
         this.waitingPlayers.push(joiningPlayer);
         joiningPlayer.socket.talk(p.encodePacket([protocol.client.lobbyJoined, this.code, 0], ["int8", "string", "int8"]));
+        console.log(`${joiningPlayer.name} join the lobby with code ${this.code}`);
         this.updateState();
     }
 
@@ -76,7 +81,8 @@ class Lobby {
             return;
         }
         if (player.host) this.players[Math.floor(this.players.length * Math.random())].host = true;
-        this.startGame();
+        this.reset();
+        this.updateState();
     }
 
     markCorrect() {
@@ -88,6 +94,7 @@ class Lobby {
     }
 
     reset() {
+        this.gamePhase = 0;
         this.currentCard = "";
         this.cardOptions = [];
         this.hints = [];
@@ -99,21 +106,32 @@ class Lobby {
             player.spectator = false;
             player.waiting = false;
             player.guessor = false;
+            player.clueFilterer = false;
+            player.removingOption = false;
             player.clue = "";
         }
     }
 
     startGame() {
         this.reset();
+        if (this.players.length < 2) {
+            this.updateState();
+            return;
+        }
         this.gamePhase = 1;
         for (let i = 0; i < this.players.length; i++) this.cardOptions.push(sortedWordArray[Math.floor(Math.random() * sortedWordArray.length)]);
         this.removingPlayers = [...this.players];
-        this.guessor = this.removingPlayers.splice(Math.floor(this.removingPlayers.length * Math.random()), 1)[0];
+        this.playerIndex++;
+        if (this.playerIndex >= this.players.length) this.playerIndex = 0;
+        this.guessor = this.removingPlayers.splice(this.playerIndex, 1)[0];
         this.guessor.guessor = true;
+        if (this.playerIndex + 1 >= this.players.length) this.players[this.playerIndex + 1].clueFilterer = true;
+        else this.players[0].clueFilterer = true;
         this.removeOption();
     }
 
     startWriting() {
+        if (this.gamePhase !== 1) return;
         this.currentCard = this.cardOptions[0];
         this.gamePhase = 2;
         for (let player of this.players) {
@@ -126,6 +144,7 @@ class Lobby {
 
     startRemoval() {
         console.log("removal phase");
+        if (this.gamePhase !== 2) return;
         this.gamePhase = 3;
         this.hints = [];
         for (let player of this.players) {
@@ -144,12 +163,13 @@ class Lobby {
 
     startGuessing() {
         console.log("guessing phase");
+        if (this.gamePhase !== 3) return;
         this.gamePhase = 4;
         for (let i = this.hints.length - 1; i >= 0; i--) {
             if (this.hints[i][0] === "!") this.hints.splice(i, 1);
             else {
                 for (let player of this.players) {
-                    if (player.clue.toLowerCase() == this.hints[i].substring(1)) this.hints.splice(i + 1, 0, player.name);
+                    if (player.clue.toLowerCase() == this.hints[i].toLowerCase.substring(1)) this.hints.splice(i + 1, 0, player.name);
                 }
             }
         }
@@ -161,12 +181,28 @@ class Lobby {
         if (this.gamePhase !== 1) return;
         console.log(`remaining options: ${this.cardOptions}`)
         if (this.cardOptions.indexOf(removedWord) !== -1) this.cardOptions.splice(this.cardOptions.indexOf(removedWord), 1);
+        else {
+            console.log(`Attempted to remove a word (${removedWord}) which could not be found.`);
+            console.log("the game has been sent to a waiting state.");
+            this.reset();
+            this.updateState();
+            return;
+        }
         if (this.cardOptions.length <= 1) {
             this.startWriting();
             return;
         }
+        if (this.removingPlayers.length <= 0) {
+            console.log("expended all players, yet words remain, so something went wrong.");
+            console.log("the game has been sent to a waiting state.");
+            this.reset();
+            this.updateState();
+            return;
+        }
 
         let remover = this.removingPlayers.splice(Math.floor(this.removingPlayers.length * Math.random()), 1)[0];
+        for (let i of this.players) i.removingOption = false;
+        remover.removingOption = true;
         let data = [protocol.client.removeCard];
         data.push(this.cardOptions.length);
         for (let word of this.cardOptions) data.push(word);
@@ -188,7 +224,7 @@ class Lobby {
     }
 
     submitClue(player, clue, takeback) {
-        if (this.gamePhase === 5) this.startGame();
+        if (this.gamePhase === 5 && player.host) this.startGame();
         if (this.gamePhase === 4) this.submitGuess(clue);
         if (this.gamePhase !== 2) return;
         for (let i of this.players) {
@@ -244,6 +280,8 @@ class Lobby {
                 data.push(i.guessor ? 1 : 0);
                 data.push(i.host ? 1 : 0);
                 data.push(i === player ? 1 : 0);
+                data.push(i.clueFilterer ? 1 : 0);
+                data.push(i.removingOption ? 1 : 0);
                 i.lobby = this;
             }
             data.push(0);
@@ -266,7 +304,7 @@ class Lobby {
                 data,
                 [
                     "int8", // header
-                    "repeat", "string", "string", "int8", "int8", "int8", "int8", "int8", "end", // player data
+                    "repeat", "string", "string", "int8", "int8", "int8", "int8", "int8", "int8", "int8", "end", // player data
                     "int8", "int8", "string", "int8", "string", // lobby data
                     "repeat", "string", "end", // card history
                     "repeat", "string", "end", // hints
@@ -332,6 +370,7 @@ const sockets = {
                 // removing a duplicated word
                 case protocol.server.removeClue: {
                     if (!this.playerInstance) break;
+                    if (!this.playerInstance.clueFilterer) break;
                     const d = p.decodePacket(reader, ["int8", "string"]);
                     this.playerInstance.lobby.toggleClue(d[1]);
                     break;
@@ -339,6 +378,7 @@ const sockets = {
                 // begin the guessing phase
                 case protocol.server.sendClues: {
                     if (!this.playerInstance) break;
+                    if (!this.playerInstance.clueFilterer) break;
                     this.playerInstance.lobby.startGuessing();
                     break;
                 }
