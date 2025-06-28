@@ -408,7 +408,9 @@ const sockets = {
 
         // if the socket is closed or disconnected, find the player and remove it from the lobby
         close() {
-            this.playerInstance.lobby.kickPlayer(this.playerInstance);
+            if (this.playerInstance) {
+                this.playerInstance.lobby.kickPlayer(this.playerInstance);
+            }
             let myIndex = sockets.clients.indexOf(this);
             if (myIndex >= 0) sockets.clients.splice(myIndex, 1);
         }
