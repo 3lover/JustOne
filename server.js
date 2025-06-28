@@ -225,7 +225,7 @@ class Lobby {
 
     submitClue(player, clue, takeback) {
         if (this.gamePhase === 5 && player.host) this.startGame();
-        if (this.gamePhase === 4) this.submitGuess(clue);
+        if (this.gamePhase === 4) this.submitGuess(clue.toLowerCase());
         if (this.gamePhase !== 2) return;
         for (let i of this.players) {
             if (player !== i) continue;
