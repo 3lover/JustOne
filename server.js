@@ -411,7 +411,7 @@ const sockets = {
                 case protocol.server.endGame: {
                     if (!this.playerInstance) break;
                     if (!this.playerInstance.host) break;
-                    if (this.playerInstance.lobby.gamePhase !== 5) break;
+                    if (!this.playerInstance.lobby || this.playerInstance.lobby.gamePhase !== 5) break;
                     this.playerInstance.lobby.gamePhase = 99;
                     this.playerInstance.lobby.updateState();
                     break;
