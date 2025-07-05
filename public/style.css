@@ -111,7 +111,7 @@ body {
 
 .bold {
     font-weight: bold;
-    position: absolute;
+    position: relative;
     top: 15vh;
 }
 
@@ -382,4 +382,29 @@ body {
     position: static;
     text-align: center;
     width: 100%;
+}
+
+#endgameanalysis {
+    width: 100vw;
+    left: 0;
+    height: 100vh;
+    top: 0;
+    position: absolute;
+    z-index: 100;
+    padding: 1vw;
+    overflow-y: scroll;
+    background-color: var(--white);
+    color: var(--black);
+}
+
+.endgameholder {
+    width: 100%;
+    text-align: center;
+    position: relative;
+    height: auto;
+}
+
+.bold2 {
+    position: relative;
+    font-weight: bold;
 }

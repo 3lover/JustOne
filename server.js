@@ -315,6 +315,11 @@ class Lobby {
                 ]
             ));
         }
+        if (this.gamePhase === 99) {
+            this.reset();
+            for (let player of this.players) this.kickPlayer(player);
+            console.log("game ended, removed all players");
+        }
     }
 }
 
@@ -400,6 +405,15 @@ const sockets = {
                     const d = p.decodePacket(reader, ["int8", "int8"]);
                     if (!this.playerInstance.lobby.players[d[1]]) break;
                     this.playerInstance.lobby.players[d[1]].socket.close();
+                    break;
+                }
+                // end the game
+                case protocol.server.endGame: {
+                    if (!this.playerInstance) break;
+                    if (!this.playerInstance.host) break;
+                    if (this.playerInstance.lobby.gamePhase !== 5) break;
+                    this.playerInstance.lobby.gamePhase = 99;
+                    this.playerInstance.lobby.updateState();
                     break;
                 }
                 // if an unknown packet header is found, log the header for potential troubleshooting

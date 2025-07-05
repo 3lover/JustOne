@@ -14,6 +14,7 @@
         "removeClue": 4,
         "sendClues": 5,
         "kickPlayer": 6,
-        "markCorrect": 7
+        "markCorrect": 7,
+        "endGame": 8
     }
 }

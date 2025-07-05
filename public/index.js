@@ -302,6 +302,7 @@ class Socket {
                             document.getElementById("infoholder").innerText += `The guessor guessed incorrectly`;
                             document.getElementById("wordinput").classList.add("incorrectlyguessed");
                         }
+                        document.getElementById("infoholder").innerText += `Press Esc as host to end the game`;
 
                         while (document.getElementById("hintholder").children.length > 0) {
                             document.getElementById("hintholder").lastChild.remove();
@@ -324,6 +325,54 @@ class Socket {
                         document.getElementById("wordsubmit").disabled = false;
                         document.getElementById("wordsubmit").innerText = "Next Card";
                         document.getElementById("wordsubmit").classList.add("nextcardstyle");
+                        break;
+                    }
+                    // game ended
+                    case 99: {
+                        console.log("game ended");
+                        document.getElementById("endgameanalysis").classList.remove("hidden");
+                        let prompts = [];
+                        prompts.push(`The game has ended!`, 1);
+                        prompts.push(`\nYour group's final score was:`, 0);
+                        prompts.push(`${d[2]}/${d[3]}`, 1);
+                        let percentage = Math.round(100 * d[2]/d[3] * 100)/100;
+                        prompts.push(`Or a grade of ${percentage}%`, 0);
+                        prompts.push(`\nYour final ranking is:`, 0);
+                        if (percentage === 100) {
+                            prompts.push(`Perfect!`, 1);
+                            prompts.push(`Just do that every time and you'll be set.`, 0);
+                        } else if (percentage >= 90) {
+                            prompts.push(`Good`, 1);
+                            prompts.push(`You did respectively, although you definitely messed up a few of those.`, 0);
+                        } else if (percentage >= 80) {
+                            prompts.push(`Fine`, 1);
+                            prompts.push(`Maybe if you try a bit harder next time you won't mess so many up.`, 0);
+                        } else if (percentage >= 70) {
+                            prompts.push(`Ok`, 1);
+                            prompts.push(`That was pretty bad, but you get a participation award I guess.`, 0);
+                        } else if (percentage >= 50) {
+                            prompts.push(`Bad`, 1);
+                            prompts.push(`I'd say something nice, but after that performance it would be disingenuous.`, 0);
+                        } else if (percentage >= 20) {
+                            prompts.push(`Trash`, 1);
+                            prompts.push(`I'd say something sarcasctic, but I don't think I can embarrass you any more than you just did.`, 0);
+                        } else {
+                            prompts.push(`Absolutely Fucked`, 1);
+                            prompts.push(`Wow, you really fucked that one up huh?`, 0);
+                        }
+
+                        prompts.push(`\nHere were your prompts for this game:`, 0);
+                        for (let hist of d[7]) {
+                            prompts.push(`${hist}`, 1);
+                        }
+
+                        for (let i = 0; i < prompts.length; i += 2) {
+                            let elm = document.createElement("p");
+                            elm.classList.add("endgameholder");
+                            if (prompts[i + 1]) elm.classList.add("bold2");
+                            elm.innerText = prompts[i];
+                            document.getElementById("endgameanalysis").appendChild(elm);
+                        }
                         break;
                     }
                 }
@@ -441,6 +490,14 @@ document.getElementById("cancelmarkcorrectbutton").addEventListener("click", fun
 document.getElementById("wordinput").addEventListener("input", function(e) {
     if (document.getElementById("wordinput").value.indexOf(" ") !== -1) {
         document.getElementById("wordinput").value = document.getElementById("wordinput").value.replace(/\s/g, '');
+    }
+});
+
+document.addEventListener("keydown", function(e) {
+    console.log(e.key)
+    if (e.key === "Escape") {
+        socket.talk(encodePacket([protocol.server.endGame], ["int8"]));
+        console.log("sent");
     }
 });
 
