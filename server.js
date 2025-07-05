@@ -170,7 +170,7 @@ class Lobby {
         if (this.gamePhase !== 3) return;
         this.gamePhase = 4;
         for (let i = this.hints.length - 1; i >= 0; i -= 2) {
-            if (this.hints[i - 1][0] === "!") this.hints[i - 1] = "-X";
+            if (this.hints[i - 1][0] === "!") this.hints[i - 1] = `-X${this.hints[i - 1].substring(1)}`;
         }
         console.log(this.hints);
         this.updateState();

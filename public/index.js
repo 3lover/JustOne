@@ -41,6 +41,8 @@ function resetInputs() {
     document.getElementById("removewordpopup").classList.add("hidden");
     document.getElementById("markcorrectpopup").classList.add("hidden");
     document.getElementById("kickwindow").classList.add("hidden");
+
+    document.getElementById("removewordholdertext").innerText = `Click on a word to remove it`;
 }
 
 // the class used to instantiate our websocket connection, holding our events and how to handle server data
@@ -279,7 +281,10 @@ class Socket {
                             let holder = document.createElement("div");
                             holder.classList.add("hintbox", "center");
                             holder.innerHTML = `<span class="hintname">${d[8][i + 1]}</span><br>${d[8][i + 0].substring(1)}`;
-                            if (d[8][i + 0].substring(1) === "X") holder.style.color = "red";
+                            if (d[8][i + 0][1] === "X") {
+                                holder.style.color = "red";
+                                holder.innerHTML = `<span class="hintname">${d[8][i + 1]}</span><br>X`;
+                            }
                             document.getElementById("hintholder").appendChild(holder);
                         }
                         break;
@@ -296,6 +301,20 @@ class Socket {
                         else {
                             document.getElementById("infoholder").innerText += `The guessor guessed incorrectly`;
                             document.getElementById("wordinput").classList.add("incorrectlyguessed");
+                        }
+
+                        while (document.getElementById("hintholder").children.length > 0) {
+                            document.getElementById("hintholder").lastChild.remove();
+                        }
+                        for (let i = 0; i < d[8].length; i += 2) {
+                            let holder = document.createElement("div");
+                            holder.classList.add("hintbox", "center");
+                            holder.innerHTML = `<span class="hintname">${d[8][i + 1]}</span><br>${d[8][i + 0].substring(1)}`;
+                            if (d[8][i + 0][1] === "X") {
+                                holder.style.color = "red";
+                                holder.innerHTML = `<span class="hintname">${d[8][i + 1]}</span><br>${d[8][i + 0].substring(2)}`;
+                            }
+                            document.getElementById("hintholder").appendChild(holder);
                         }
 
                         document.getElementById("wordholder").innerText = d[4];
