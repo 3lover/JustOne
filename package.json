@@ -19,7 +19,7 @@
       "popular-english-words": "latest"
     },
     "engines": {
-      "node": "latest"
+      "node": "16.x"
     },
     "keywords": []
   }

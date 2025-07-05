@@ -48,6 +48,7 @@ class Socket {
     constructor() {
         this.socket = null;
         this.connected = false;
+        this.pingsocket = false;
     }
 
     // attempts to form a connection with the websocket server (wss), if one doesn't already exist
@@ -78,6 +79,7 @@ class Socket {
 
     // when we recieve an encoded packet, we decode it based on the header and execute the appropriate steps
     message(packet) {
+        if (this.pingsocket) return;
         let reader = new DataView(packet.data);
         
         switch (reader.getInt8(0)) {
@@ -342,7 +344,7 @@ class Socket {
 
     // when we complete a handshake with the wss, we log a quick confirmation
     open() {
-        console.log("Socket connected");
+        if (!this.pingsocket) console.log("Socket connected");
     }
 
     // in the case of an error, we directly log the recieved error
@@ -352,8 +354,10 @@ class Socket {
 
     // in the case of the server closing us while still connected, we log the reason and disconnect
     close(reason) {
-        console.log(`Socket closed for reason:`);
-        console.log(reason)
+        if (!this.pingsocket) {
+            console.log(`Socket closed for reason:`);
+            console.log(reason);
+        }
         this.disconnect();
     }
 }
@@ -420,3 +424,15 @@ document.getElementById("wordinput").addEventListener("input", function(e) {
         document.getElementById("wordinput").value = document.getElementById("wordinput").value.replace(/\s/g, '');
     }
 });
+
+// for our render hosting, we need to do this to keep the project active
+function pingRender() {
+    let pingsocket = new Socket();
+    pingsocket.connect();
+    pingsocket.pingsocket = true;
+    setTimeout(function(e) {
+        pingsocket.disconnect();
+        pingsocket = null;
+    }, 1000);
+}
+setInterval(pingRender, 5 * 60 * 1000);
