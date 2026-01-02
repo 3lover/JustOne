@@ -295,14 +295,14 @@ class Socket {
                         document.getElementById("infoholder").innerText = `The game is over\n`;
 
                         if (d[6] === d[4]) {
-                            document.getElementById("infoholder").innerText += `The guessor guessed correctly`;
+                            document.getElementById("infoholder").innerText += `The guessor guessed correctly.`;
                             document.getElementById("wordinput").classList.add("correctlyguessed");
                         }
                         else {
-                            document.getElementById("infoholder").innerText += `The guessor guessed incorrectly`;
+                            document.getElementById("infoholder").innerText += `The guessor guessed incorrectly.`;
                             document.getElementById("wordinput").classList.add("incorrectlyguessed");
                         }
-                        document.getElementById("infoholder").innerText += `Press Esc as host to end the game`;
+                        document.getElementById("infoholder").innerText += ` (Press Esc to end the game as host)`;
 
                         while (document.getElementById("hintholder").children.length > 0) {
                             document.getElementById("hintholder").lastChild.remove();
@@ -340,25 +340,67 @@ class Socket {
                         prompts.push(`\nYour final ranking is:`, 0);
                         if (percentage === 100) {
                             prompts.push(`Perfect!`, 1);
-                            prompts.push(`Just do that every time and you'll be set.`, 0);
-                        } else if (percentage >= 90) {
+                            let possibilities = [
+                                `Just do that every time and you'll be set.`,
+                                `Did you cheat or something?`,
+                                `Why are you celebrating, even a stopped clock is right twice a day.`,
+                                `You did it, you mastered the art of basic communication! Now try reading a book or something.`
+                            ];
+                            prompts.push(possibilities[Math.floor(possibilities.length * Math.random())], 0);
+                        } else if (percentage >= 85) {
                             prompts.push(`Good`, 1);
-                            prompts.push(`You did respectively, although you definitely messed up a few of those.`, 0);
-                        } else if (percentage >= 80) {
-                            prompts.push(`Fine`, 1);
-                            prompts.push(`Maybe if you try a bit harder next time you won't mess so many up.`, 0);
+                            let possibilities = [
+                                `I'd say you did good, but I don't like to encourage mediocrity.`,
+                                `I guess we can't all be perfect.`,
+                                `You did ok I guess, but next time maybe try not getting any wrong.`,
+                                `It looks like you might be ready to try some big kid words next time.`
+                            ];
+                            prompts.push(possibilities[Math.floor(possibilities.length * Math.random())], 0);
                         } else if (percentage >= 70) {
+                            prompts.push(`Fine`, 1);
+                            let possibilities = [
+                                `Most people try to get as many right as possible, but I hope you guys had fun doing whatever the hell that was instead.`,
+                                `Try harder next time and you might even be able to do better!`,
+                                `I'm not going to lie to you, which makes this akward because you kinda sucked.`,
+                                `You got a passing grade, at least so long as you are a 'Cs get degrees' type of person.`
+                            ];
+                            prompts.push(possibilities[Math.floor(possibilities.length * Math.random())], 0);
+                        } else if (percentage >= 55) {
                             prompts.push(`Ok`, 1);
-                            prompts.push(`That was pretty bad, but you get a participation award I guess.`, 0);
-                        } else if (percentage >= 50) {
+                            let possibilities = [
+                                `If it was up to me you wouldn't even get a participation award, but I guess you tried your 'best'.`,
+                                `Maybe you should play something simpler like Chutes and Ladders or Candy Land next time.`,
+                                `Keep in mind the target audience of this game is literate people.`,
+                                `I'd explain how bad you guys did, but based on what I just saw you wouldn't understand.`
+                            ];
+                            prompts.push(possibilities[Math.floor(possibilities.length * Math.random())], 0);
+                        } else if (percentage >= 40) {
                             prompts.push(`Bad`, 1);
-                            prompts.push(`I'd say something nice, but after that performance it would be disingenuous.`, 0);
+                            let possibilities = [
+                                `If the group is only as strong as its weakest link, your group is missing a link.`,
+                                `That was a complete trainwreck, maybe it is time to throw in the towel?`,
+                                `It might be a good idea to actually know the rules if you choose to play again.`,
+                                `I've seen better performances from children playing recorders.`
+                            ];
+                            prompts.push(possibilities[Math.floor(possibilities.length * Math.random())], 0);
                         } else if (percentage >= 20) {
                             prompts.push(`Trash`, 1);
-                            prompts.push(`I'd say something sarcasctic, but I don't think I can embarrass you any more than you just did.`, 0);
+                            let possibilities = [
+                                `I'd say something sarcastic, but I don't think I could embarass you any more than you just did yourselves.`,
+                                `You couldn't waterboard this game out of me.`,
+                                `What you just did is like getting a 20% on a True or False test.`,
+                                `Most toddlers have better diction than you guys.`
+                            ];
+                            prompts.push(possibilities[Math.floor(possibilities.length * Math.random())], 0);
                         } else {
                             prompts.push(`Absolutely Fucked`, 1);
-                            prompts.push(`Wow, you really fucked that one up huh?`, 0);
+                            let possibilities = [
+                                `I couldn't score that low if I tried.`,
+                                `Wow, you really fucked that one up huh?`,
+                                `Ending the game was probably a good idea, because holy shit that was sad to watch.`,
+                                `I'd say good game, but you guys didn't do anything good the entire game.`
+                            ];
+                            prompts.push(possibilities[Math.floor(possibilities.length * Math.random())], 0);
                         }
 
                         prompts.push(`\nHere were your prompts for this game:`, 0);
