@@ -398,7 +398,7 @@ const sockets = {
                     this.playerInstance.lobby.markCorrect();
                     break;
                 }
-                // kick player
+                // kicks player
                 case protocol.server.kickPlayer: {
                     if (!this.playerInstance) break;
                     if (!this.playerInstance.host) break;

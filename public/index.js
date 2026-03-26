@@ -358,6 +358,7 @@ class Socket {
                             prompts.push(possibilities[Math.floor(possibilities.length * Math.random())], 0);
                         } else if (percentage >= 70) {
                             prompts.push(`Fine`, 1);
+                            // example
                             let possibilities = [
                                 `Most people try to get as many right as possible, but I hope you guys had fun doing whatever the hell that was instead.`,
                                 `Try harder next time and you might even be able to do better!`,
